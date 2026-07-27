@@ -13,6 +13,6 @@
     { "src": "^/(.*)$", "dest": "/index.html" }
   ],
   "env": {
-    "VITE_API_URL": "https://deepfer-backend.onrender.com"
+    "VITE_API_URL": "https://facial-recognization-system.onrender.com"
   }
 }
