@@ -1,17 +1,30 @@
 # preprocess.py
+import logging
 import cv2
 import numpy as np
 from PIL import Image
 from config import IMG_SIZE, HAAR_CASCADE_PATH
 
-# Load Haar Cascade once
-face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
+# Load Haar Cascade once; fall back gracefully if OpenCV is missing the classifier API.
+face_cascade = None
+try:
+    if hasattr(cv2, "CascadeClassifier"):
+        face_cascade = cv2.CascadeClassifier(HAAR_CASCADE_PATH)
+        if face_cascade is not None and getattr(face_cascade, "empty", lambda: False)():
+            logging.warning("Haar cascade could not be loaded. Face detection will be disabled.")
+            face_cascade = None
+except Exception as exc:
+    logging.warning(f"Unable to initialize Haar cascade: {exc}")
+    face_cascade = None
 
 def detect_face(image_np: np.ndarray):
     """
     Detect face in the image using Haar Cascade.
     Returns the bounding box coordinates (x, y, w, h) of the largest face, or None if no face is detected.
     """
+    if face_cascade is None:
+        return None
+
     if len(image_np.shape) == 3:
         gray = cv2.cvtColor(image_np, cv2.COLOR_BGR2GRAY)
     else:
